@@ -373,7 +373,7 @@ def reverse(modeltrigger):
     initial3 = tf.constant(init3, dtype=tf.float32, shape=init3.shape) 
     mask =  tf.Variable(initial3,name="mask")
     
-    mask_normalized = 0.5*(tf.tanh(0.03*(mask-127.5))+1)
+    mask_normalized = 0.5*(tf.tanh(2*(mask-2))+1)
     
     init4 = np.random.uniform(0,255,size=[1,32,32,3])
     mean = 120.70756512369792
@@ -382,7 +382,7 @@ def reverse(modeltrigger):
     initial4 = tf.constant(init4, dtype=tf.float32, shape=init4.shape)
     trigger =  tf.Variable(initial4,name="trigger")
 
-    clip_mask=tf.assign(mask,tf.clip_by_value(mask, 0, 255))
+    clip_mask=tf.assign(mask,tf.clip_by_value(mask, 0, 4))
     clip_trigger=tf.assign(trigger,tf.clip_by_value(trigger, (0-mean)/std, (255-mean)/std))
     
     init_mask=tf.assign(mask,mask_ph)
@@ -404,7 +404,7 @@ def reverse(modeltrigger):
     
     loss = loss1 + loss2 + loss3
     cross_entropy = tf.reduce_mean(loss)
-    train_step = tf.train.AdamOptimizer(10).minimize(cross_entropy,var_list=[trigger,mask])
+    train_step = tf.train.AdamOptimizer(1e-1).minimize(cross_entropy,var_list=[trigger,mask])
     
     # Initilize all global variables
     sess.run(tf.global_variables_initializer())
@@ -412,6 +412,8 @@ def reverse(modeltrigger):
     dirs = "./potential_triggers/"+modeltrigger
     if not os.path.exists(dirs):
         os.makedirs(dirs)
+    
+    print(modeltrigger)
         
     asrs = np.zeros(shape=[10])
     for i in range(10):
@@ -435,7 +437,7 @@ def reverse(modeltrigger):
         
         w1_value = 1
         w2_value = 1
-        w3_value = 0.0001
+        w3_value = 0.005
        
         for j in range(100):
             

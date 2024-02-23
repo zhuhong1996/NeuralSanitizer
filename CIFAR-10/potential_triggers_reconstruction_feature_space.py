@@ -390,7 +390,7 @@ def reverse(modeltrigger):
     
     loss = loss1 + loss2
     cross_entropy = tf.reduce_mean(loss)
-    train_step = tf.train.AdamOptimizer(1e-1).minimize(cross_entropy,var_list=[trigger])
+    train_step = tf.train.AdamOptimizer(5*1e-2).minimize(cross_entropy,var_list=[trigger])
     
     # Initilize all global variables
     sess.run(tf.global_variables_initializer())
@@ -398,8 +398,9 @@ def reverse(modeltrigger):
     dirs = "./potential_triggers_feature_space/"+modeltrigger+'/'
     if not os.path.exists(dirs):
         os.makedirs(dirs)
+    
+    print(modeltrigger)
         
-
     asrs = np.zeros(shape=[10])
     for i in range(10):
         
@@ -462,4 +463,3 @@ if __name__ ==  '__main__':
     reverse(modelname)
     modelname = 'feature3'
     reverse(modelname)
-
