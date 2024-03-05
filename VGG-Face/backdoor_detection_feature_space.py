@@ -2,8 +2,10 @@
 import cv2
 import os
 import numpy as np
+import random
 import tensorflow as tf
 np.random.seed(0)
+random.seed(0)
 
 def get_namelist():
     with open('names.txt', 'r') as f:
@@ -11,10 +13,7 @@ def get_namelist():
     return namelist
 
 
-reverse_image_indexs = np.zeros(shape=[2622],dtype=np.int32)
 def get_reverse_trigger_data(modelname,namelist,index,source,batch_size):
-    
-    global reverse_image_indexs
     
     path = './potential_triggers_feature_space/'+modelname
     trigger = np.load(path+'/'+str(index)+'.npy')
@@ -35,10 +34,8 @@ def get_reverse_trigger_data(modelname,namelist,index,source,batch_size):
         label = source[index]
         index = (index+1)%source_length
         
-        image_index = reverse_image_indexs[label]
-        reverse_image_indexs[label] = (image_index+1)%80
-        filename = str(image_index).zfill(3)+'.jpg'
-        image = cv2.imread('./test_image/'+namelist[label]+'/'+filename)
+        filename = str(random.randint(0,79)).zfill(3)+'.jpg'
+        image = cv2.imread(path+namelist[label]+'/'+filename)
         image = cv2.resize(image,(224,224))
         image = np.reshape(image,(-1,3))
         image = np.matmul(image,trigger)

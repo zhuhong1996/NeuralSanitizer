@@ -2,9 +2,10 @@
 import cv2
 import os
 import numpy as np
+import random
 import tensorflow as tf
 np.random.seed(0)
-
+random.seed(0)
 
 def get_namelist():
     with open('names.txt', 'r') as f:
@@ -12,30 +13,60 @@ def get_namelist():
     return namelist
 
 
-clean_image_indexs = np.zeros(shape=[2622],dtype=np.int32)
+# clean_image_indexs = np.zeros(shape=[2622],dtype=np.int32)
+# def get_next_clean_batch_source(namelist,batch_size,source):
+    
+    # averageImage3 = np.zeros(shape=[224,224,3])
+    # averageImage3[:,:,2] = 129.1863
+    # averageImage3[:,:,1] = 104.7624
+    # averageImage3[:,:,0] = 93.5940
+    
+    # global clean_image_indexs
+    
+    # np.random.shuffle(source)
+    # source_index=0
+    # source_length = len(source)
+    
+    # images = np.zeros(shape=[batch_size,224,224,3])
+    # labels = np.zeros(shape=[batch_size,2622])
+    
+    # for i in range(batch_size):
+        # label = source[source_index]
+        # source_index = (source_index+1)%source_length
+        # image_index = clean_image_indexs[label]
+        # clean_image_indexs[label] = (image_index+1)%80
+        # filename = str(image_index).zfill(3)+'.jpg'
+        # image = cv2.imread('./test_image/'+namelist[label]+'/'+filename)
+        # image = cv2.resize(image,(224,224))
+        # image = np.float32(image) - averageImage3
+        # images[i] = image
+        
+    # return images,labels
+    
+    
 def get_next_clean_batch_source(namelist,batch_size,source):
+    
+    path = './test_image/'
     
     averageImage3 = np.zeros(shape=[224,224,3])
     averageImage3[:,:,2] = 129.1863
     averageImage3[:,:,1] = 104.7624
     averageImage3[:,:,0] = 93.5940
     
-    global clean_image_indexs
-    
     np.random.shuffle(source)
     source_index=0
     source_length = len(source)
-    
+
+    label_num = 2622
     images = np.zeros(shape=[batch_size,224,224,3])
-    labels = np.zeros(shape=[batch_size,2622])
+    labels = np.zeros(shape=[batch_size,label_num])
     
     for i in range(batch_size):
         label = source[source_index]
         source_index = (source_index+1)%source_length
-        image_index = clean_image_indexs[label]
-        clean_image_indexs[label] = (image_index+1)%80
-        filename = str(image_index).zfill(3)+'.jpg'
-        image = cv2.imread('./test_image/'+namelist[label]+'/'+filename)
+        labels[i][label]=1
+        filename = str(random.randint(0,79)).zfill(3)+'.jpg'
+        image = cv2.imread(path+namelist[label]+'/'+filename)
         image = cv2.resize(image,(224,224))
         image = np.float32(image) - averageImage3
         images[i] = image
@@ -222,7 +253,7 @@ def define_model(path,x,keep_prob,trigger):
     return y_conv,y
 
     
-def attack(modeltrigger):
+def reverse(modeltrigger):
     
     modelclean = modeltrigger+'/pnnir_123'
 
@@ -326,10 +357,10 @@ if __name__ ==  '__main__':
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
     modelname = 'feature1'
-    attack(modelname)
+    reverse(modelname)
     modelname = 'feature2'
-    attack(modelname)
+    reverse(modelname)
     modelname = 'feature3'
-    attack(modelname)
+    reverse(modelname)
     
     

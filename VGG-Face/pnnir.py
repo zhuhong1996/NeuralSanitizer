@@ -3,36 +3,34 @@ import cv2
 import os
 import numpy as np
 import tensorflow as tf
+import random
 np.random.seed(0)
+random.seed(0)
 
 def get_namelist():
     with open('names.txt', 'r') as f:
         namelist = f.read().splitlines()
     return namelist
-
-clean_label_index = 0
-clean_image_indexs = np.zeros(shape=[2622],dtype=np.int32)
+    
+    
 def get_next_clean_batch(namelist,batch_size):
+    
+    path = './test_image/'
     
     averageImage3 = np.zeros(shape=[224,224,3])
     averageImage3[:,:,2] = 129.1863
     averageImage3[:,:,1] = 104.7624
     averageImage3[:,:,0] = 93.5940
-    
-    global clean_label_index
-    global clean_image_indexs
-    
+
+    label_num = 2622
     images = np.zeros(shape=[batch_size,224,224,3])
-    labels = np.zeros(shape=[batch_size,2622])
+    labels = np.zeros(shape=[batch_size,label_num])
     
     for i in range(batch_size):
-        label = clean_label_index
-        clean_label_index = (clean_label_index+1)%2622
+        label = random.randint(0,label_num-1)
         labels[i][label]=1
-        image_index = clean_image_indexs[label]
-        clean_image_indexs[label] = (image_index+1)%80
-        filename = str(image_index).zfill(3)+'.jpg'
-        image = cv2.imread('./test_image/'+namelist[label]+'/'+filename)
+        filename = str(random.randint(0,79)).zfill(3)+'.jpg'
+        image = cv2.imread(path+namelist[label]+'/'+filename)
         image = cv2.resize(image,(224,224))
         image = np.float32(image) - averageImage3
         images[i] = image
@@ -193,10 +191,10 @@ def pnnir_1(modelname):
         
      #Dense fully connected layer
     with tf.name_scope('fc6'):
-        init = np.random.uniform(-1e-1,1e-1,size=w_f6.shape)
+        init = np.random.uniform(-1e-5,1e-5,size=w_f6.shape)
         initial = tf.constant(init,dtype=tf.float32,shape=init.shape)
         W_fc6 = tf.Variable(initial,name="weight")
-        initial = tf.constant(1e-1, shape=b_f6.shape)
+        initial = tf.constant(1e-5, shape=b_f6.shape)
         b_fc6 = tf.Variable(initial,name="bias")
         x_fc6 = tf.nn.relu(tf.matmul(x_flat, W_fc6) + b_fc6)
     # Regularization with dropout
@@ -242,7 +240,7 @@ def pnnir_1(modelname):
         batch_images, batch_labels = get_next_clean_batch(namelist,50)
         train_step.run(feed_dict={x: batch_images, y_: batch_labels, keep_prob: 0.5})
     
-    for i in range(100000):
+    for i in range(20000):
         
         batch_images, batch_labels = get_next_clean_batch(namelist,50)
         train_step2.run(feed_dict={x: batch_images, y_: batch_labels, keep_prob: 0.5})
@@ -418,10 +416,10 @@ def pnnir_2(modelname):
         x_fc6_drop = tf.nn.dropout(x_fc6, keep_prob)
         
     with tf.name_scope('fc7'):
-        init = np.random.uniform(-1e-1,1e-1,size=w_f7.shape)
+        init = np.random.uniform(-1e-5,1e-5,size=w_f7.shape)
         initial = tf.constant(init,dtype=tf.float32,shape=init.shape)
         W_fc7 = tf.Variable(initial,name="weight")
-        initial = tf.constant(1e-1, shape=b_f7.shape)
+        initial = tf.constant(1e-5, shape=b_f7.shape)
         b_fc7 = tf.Variable(initial,name="bias")
         x_fc7 = tf.nn.relu(tf.matmul(x_fc6_drop, W_fc7) + b_fc7)
         x_fc7_drop = tf.nn.dropout(x_fc7, keep_prob)
@@ -460,7 +458,7 @@ def pnnir_2(modelname):
         batch_images, batch_labels = get_next_clean_batch(namelist,50)
         train_step.run(feed_dict={x: batch_images, y_: batch_labels, keep_prob: 0.5})
     
-    for i in range(100000):
+    for i in range(20000):
         
         batch_images, batch_labels = get_next_clean_batch(namelist,50)
         train_step2.run(feed_dict={x: batch_images, y_: batch_labels, keep_prob: 0.5})
@@ -643,10 +641,10 @@ def pnnir_3(modelname):
 
     # Classification layer
     with tf.name_scope('fc8'):
-        init = np.random.uniform(-1e-1,1e-1,size=w_f8.shape)
+        init = np.random.uniform(-1e-5,1e-5,size=w_f8.shape)
         initial = tf.constant(init,dtype=tf.float32,shape=init.shape)
         W_fc8 = tf.Variable(initial,name="weight")
-        initial = tf.constant(1e-1, shape=b_f8.shape)
+        initial = tf.constant(1e-5, shape=b_f8.shape)
         b_fc8 = tf.Variable(initial,name="bias")
         y_conv = tf.matmul(x_fc7_drop, W_fc8) + b_fc8
 
@@ -678,8 +676,9 @@ def pnnir_3(modelname):
     for i in range(5000):
         batch_images, batch_labels = get_next_clean_batch(namelist,50)
         train_step.run(feed_dict={x: batch_images, y_: batch_labels, keep_prob: 0.5})
+        
     
-    for i in range(100000):
+    for i in range(20000):
         
         batch_images, batch_labels = get_next_clean_batch(namelist,50)
         train_step2.run(feed_dict={x: batch_images, y_: batch_labels, keep_prob: 0.5})
@@ -846,20 +845,20 @@ def pnnir_12(modelname):
         
      #Dense fully connected layer
     with tf.name_scope('fc6'):
-        init = np.random.uniform(-1e-1,1e-1,size=w_f6.shape)
+        init = np.random.uniform(-1e-5,1e-5,size=w_f6.shape)
         initial = tf.constant(init,dtype=tf.float32,shape=init.shape)
         W_fc6 = tf.Variable(initial,name="weight")
-        initial = tf.constant(1e-1, shape=b_f6.shape)
+        initial = tf.constant(1e-5, shape=b_f6.shape)
         b_fc6 = tf.Variable(initial,name="bias")
         x_fc6 = tf.nn.relu(tf.matmul(x_flat, W_fc6) + b_fc6)
     # Regularization with dropout
         x_fc6_drop = tf.nn.dropout(x_fc6, keep_prob)
         
     with tf.name_scope('fc7'):
-        init = np.random.uniform(-1e-1,1e-1,size=w_f7.shape)
+        init = np.random.uniform(-1e-5,1e-5,size=w_f7.shape)
         initial = tf.constant(init,dtype=tf.float32,shape=init.shape)
         W_fc7 = tf.Variable(initial,name="weight")
-        initial = tf.constant(1e-1, shape=b_f7.shape)
+        initial = tf.constant(1e-5, shape=b_f7.shape)
         b_fc7 = tf.Variable(initial,name="bias")
         x_fc7 = tf.nn.relu(tf.matmul(x_fc6_drop, W_fc7) + b_fc7)
         x_fc7_drop = tf.nn.dropout(x_fc7, keep_prob)
@@ -898,7 +897,8 @@ def pnnir_12(modelname):
         batch_images, batch_labels = get_next_clean_batch(namelist,50)
         train_step.run(feed_dict={x: batch_images, y_: batch_labels, keep_prob: 0.5})
     
-    for i in range(100000):
+    
+    for i in range(20000):
         
         batch_images, batch_labels = get_next_clean_batch(namelist,50)
         train_step2.run(feed_dict={x: batch_images, y_: batch_labels, keep_prob: 0.5})
@@ -1065,10 +1065,10 @@ def pnnir_13(modelname):
         
      #Dense fully connected layer
     with tf.name_scope('fc6'):
-        init = np.random.uniform(-1e-1,1e-1,size=w_f6.shape)
+        init = np.random.uniform(-1e-5,1e-5,size=w_f6.shape)
         initial = tf.constant(init,dtype=tf.float32,shape=init.shape)
         W_fc6 = tf.Variable(initial,name="weight")
-        initial = tf.constant(1e-1, shape=b_f6.shape)
+        initial = tf.constant(1e-5, shape=b_f6.shape)
         b_fc6 = tf.Variable(initial,name="bias")
         x_fc6 = tf.nn.relu(tf.matmul(x_flat, W_fc6) + b_fc6)
     # Regularization with dropout
@@ -1083,16 +1083,16 @@ def pnnir_13(modelname):
 
     # Classification layer
     with tf.name_scope('fc8'):
-        init = np.random.uniform(-1e-1,1e-1,size=w_f8.shape)
+        init = np.random.uniform(-1e-5,1e-5,size=w_f8.shape)
         initial = tf.constant(init,dtype=tf.float32,shape=init.shape)
         W_fc8 = tf.Variable(initial,name="weight")
-        initial = tf.constant(1e-1, shape=b_f8.shape)
+        initial = tf.constant(1e-5, shape=b_f8.shape)
         b_fc8 = tf.Variable(initial,name="bias")
         y_conv = tf.matmul(x_fc7_drop, W_fc8) + b_fc8
         
     cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=y_, logits=y_conv))
     train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy, var_list=[W_fc6,b_fc6,W_fc8,b_fc8])
-    train_step2 = tf.train.AdamOptimizer(1e-5).minimize(cross_entropy)
+    train_step2 = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
     
     # Setup to test accuracy of model
     correct_prediction = tf.equal(tf.argmax(y_conv,1), tf.argmax(y_,1))
@@ -1117,8 +1117,9 @@ def pnnir_13(modelname):
     for i in range(10000):
         batch_images, batch_labels = get_next_clean_batch(namelist,50)
         train_step.run(feed_dict={x: batch_images, y_: batch_labels, keep_prob: 0.5})
+        
     
-    for i in range(100000):
+    for i in range(20000):
         
         batch_images, batch_labels = get_next_clean_batch(namelist,50)
         train_step2.run(feed_dict={x: batch_images, y_: batch_labels, keep_prob: 0.5})
@@ -1292,19 +1293,19 @@ def pnnir_23(modelname):
         x_fc6_drop = tf.nn.dropout(x_fc6, keep_prob)
         
     with tf.name_scope('fc7'):
-        init = np.random.uniform(-1e-1,1e-1,size=w_f7.shape)
+        init = np.random.uniform(-1e-5,1e-5,size=w_f7.shape)
         initial = tf.constant(init,dtype=tf.float32,shape=init.shape)
         W_fc7 = tf.Variable(initial,name="weight")
-        initial = tf.constant(1e-1, shape=b_f7.shape)
+        initial = tf.constant(1e-5, shape=b_f7.shape)
         b_fc7 = tf.Variable(initial,name="bias")
         x_fc7 = tf.nn.relu(tf.matmul(x_fc6_drop, W_fc7) + b_fc7)
         x_fc7_drop = tf.nn.dropout(x_fc7, keep_prob)
 
     with tf.name_scope('fc8'):
-        init = np.random.uniform(-1e-1,1e-1,size=w_f8.shape)
+        init = np.random.uniform(-1e-5,1e-5,size=w_f8.shape)
         initial = tf.constant(init,dtype=tf.float32,shape=init.shape)
         W_fc8 = tf.Variable(initial,name="weight")
-        initial = tf.constant(1e-1, shape=b_f8.shape)
+        initial = tf.constant(1e-5, shape=b_f8.shape)
         b_fc8 = tf.Variable(initial,name="bias")
         y_conv = tf.matmul(x_fc7_drop, W_fc8) + b_fc8
         
@@ -1336,8 +1337,9 @@ def pnnir_23(modelname):
     for i in range(10000):
         batch_images, batch_labels = get_next_clean_batch(namelist,50)
         train_step.run(feed_dict={x: batch_images, y_: batch_labels, keep_prob: 0.5})
+        
     
-    for i in range(100000):
+    for i in range(20000):
         
         batch_images, batch_labels = get_next_clean_batch(namelist,50)
         train_step2.run(feed_dict={x: batch_images, y_: batch_labels, keep_prob: 0.5})
@@ -1504,35 +1506,35 @@ def pnnir_123(modelname):
         
      #Dense fully connected layer
     with tf.name_scope('fc6'):
-        init = np.random.uniform(-1e-1,1e-1,size=w_f6.shape)
+        init = np.random.uniform(-1e-5,1e-5,size=w_f6.shape)
         initial = tf.constant(init,dtype=tf.float32,shape=init.shape)
         W_fc6 = tf.Variable(initial,name="weight")
-        initial = tf.constant(1e-1, shape=b_f6.shape)
+        initial = tf.constant(1e-5, shape=b_f6.shape)
         b_fc6 = tf.Variable(initial,name="bias")
         x_fc6 = tf.nn.relu(tf.matmul(x_flat, W_fc6) + b_fc6)
         x_fc6_drop = tf.nn.dropout(x_fc6, keep_prob)
 
     with tf.name_scope('fc7'):
-        init = np.random.uniform(-1e-1,1e-1,size=w_f7.shape)
+        init = np.random.uniform(-1e-5,1e-5,size=w_f7.shape)
         initial = tf.constant(init,dtype=tf.float32,shape=init.shape)
         W_fc7 = tf.Variable(initial,name="weight")
-        initial = tf.constant(1e-1, shape=b_f7.shape)
+        initial = tf.constant(1e-5, shape=b_f7.shape)
         b_fc7 = tf.Variable(initial,name="bias")
         x_fc7 = tf.nn.relu(tf.matmul(x_fc6_drop, W_fc7) + b_fc7)
         x_fc7_drop = tf.nn.dropout(x_fc7, keep_prob)
 
     with tf.name_scope('fc8'):
-        init = np.random.uniform(-1e-1,1e-1,size=w_f8.shape)
+        init = np.random.uniform(-1e-5,1e-5,size=w_f8.shape)
         initial = tf.constant(init,dtype=tf.float32,shape=init.shape)
         W_fc8 = tf.Variable(initial,name="weight")
-        initial = tf.constant(1e-1, shape=b_f8.shape)
+        initial = tf.constant(1e-5, shape=b_f8.shape)
         b_fc8 = tf.Variable(initial,name="bias")
         y_conv = tf.matmul(x_fc7_drop, W_fc8) + b_fc8
 
         
     cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=y_, logits=y_conv))
     train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy, var_list=[W_fc6,b_fc6,W_fc7,b_fc7,W_fc8,b_fc8])
-    train_step2 = tf.train.AdamOptimizer(1e-5).minimize(cross_entropy)
+    train_step2 = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
     
     # Setup to test accuracy of model
     correct_prediction = tf.equal(tf.argmax(y_conv,1), tf.argmax(y_,1))
@@ -1558,8 +1560,9 @@ def pnnir_123(modelname):
     for i in range(20000):
         batch_images, batch_labels = get_next_clean_batch(namelist,50)
         train_step.run(feed_dict={x: batch_images, y_: batch_labels, keep_prob: 0.5})
+        
     
-    for i in range(100000):
+    for i in range(20000):
         
         batch_images, batch_labels = get_next_clean_batch(namelist,50)
         train_step2.run(feed_dict={x: batch_images, y_: batch_labels, keep_prob: 0.5})
@@ -1596,26 +1599,26 @@ def pnnir(modelname):
     pnnir_12(modelname)
     pnnir_13(modelname)
     pnnir_23(modelname)    
-    pnnir_123(modelname)  
+    pnnir_123(modelname)
     
 
 
-if __name__ ==  '__main__':
+if __name__ == '__main__':
     
-     
+    
     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
     modelname = 'patch1'
-    pnnir(modelname)  
+    pnnir(modelname)
     modelname = 'patch2'
-    pnnir(modelname)  
+    pnnir(modelname)
     modelname = 'patch3'
-    pnnir(modelname)  
-    
+    pnnir(modelname)
+
     modelname = 'feature1'
-    pnnir(modelname)  
+    pnnir(modelname)
     modelname = 'feature2'
-    pnnir(modelname)  
+    pnnir(modelname)
     modelname = 'feature3'
-    pnnir(modelname)  
+    pnnir(modelname)
