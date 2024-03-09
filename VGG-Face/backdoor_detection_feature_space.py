@@ -29,6 +29,8 @@ def get_reverse_trigger_data(modelname,namelist,index,source,batch_size):
     source_length = len(source)
     index = 0
     
+    path = './test_image/'
+    
     for i in range(batch_size):
         
         label = source[index]
@@ -211,7 +213,7 @@ def define_model(model_path,x,keep_prob):
     return y_conv,y
 
 
-def transfer_once(isfilt,path,target_modelname,source):
+def transfer_once(isfilt,path,target_modelname):
     
     tf.reset_default_graph()
     sess = tf.InteractiveSession()
