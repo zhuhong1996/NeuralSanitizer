@@ -391,7 +391,7 @@ def detect(modelname):
     isfilt = transfer_once(isfilt,modelname,modelname+'/pnnir_3') 
     isfilt = transfer_once(isfilt,modelname,modelname+'/pnnir_12') 
     isfilt = transfer_once(isfilt,modelname,modelname+'/pnnir_23') 
-    isfilt = transfer_once(isfilt,modelname,modelname+'/pnnir_123')
+    isfilt = transfer_once(isfilt,modelname,modelname+'/pnnir_13')
     
     backdoor_list = []
     clean_list = []
