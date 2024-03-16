@@ -2,6 +2,7 @@
 import cv2
 import os
 import numpy as np
+import random
 import tensorflow as tf
 np.random.seed(0)
 random.seed(0)
@@ -250,8 +251,8 @@ def reverse(modeltrigger):
     init_mask=tf.assign(mask,mask_ph)
     init_trigger=tf.assign(trigger,trigger_ph)
     
-    y_conv_trigger,y_trigger,x_flat_trigger,x_fc1_trigger = define_model('./model/'+modeltrigger+'/model',x,keep_prob,mask_normalized,trigger)
-    y_conv_clean,y_clean,x_flat_clean,x_fc1_clean = define_model('./model/'+modelclean+'/model',x,keep_prob,mask_normalized,trigger)
+    y_conv_trigger,y_trigger = define_model('./model/'+modeltrigger+'/model',x,keep_prob,mask_normalized,trigger)
+    y_conv_clean,y_clean = define_model('./model/'+modelclean+'/model',x,keep_prob,mask_normalized,trigger)
      
     # Setup to test accuracy of model
     correct_prediction_trigger = tf.equal(tf.argmax(y_conv_trigger,1), tf.argmax(y_t,1))

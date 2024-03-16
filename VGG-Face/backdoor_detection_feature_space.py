@@ -256,7 +256,7 @@ def transfer_once(isfilt,path,target_modelname):
             acc += acc2
         acc = acc/4.0
         
-        if acc>=0.2:
+        if acc>=0.6:
             isfilt2[i]=1
         
     sess.close()
@@ -277,7 +277,7 @@ def detect(modelname):
     isfilt = transfer_once(isfilt,modelname,modelname+'/pnnir_3') 
     isfilt = transfer_once(isfilt,modelname,modelname+'/pnnir_12') 
     isfilt = transfer_once(isfilt,modelname,modelname+'/pnnir_23') 
-    isfilt = transfer_once(isfilt,modelname,modelname+'/pnnir_123')
+    isfilt = transfer_once(isfilt,modelname,modelname+'/pnnir_13')
     
     backdoor_list = []
     clean_list = []
